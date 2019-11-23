@@ -1,11 +1,7 @@
-set nocompatible              " be iMproved, required
 filetype plugin on                  " required
 syntax enable
 set background=dark
 colorscheme gruvbox
-
-" Every time you open a journal file (create/edit), append the timestamp
-autocmd VimEnter *.jrnl $pu=strftime('%n[%a, %d %b %Y %T %z]%n%n')
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -39,6 +35,7 @@ map <C-n> :NERDTreeToggle<CR>
 
 vnoremap <Leader>s :sort<CR>
 
+set nocompatible
 set clipboard=unnamed
 set bs=2
 set autoindent
@@ -72,8 +69,8 @@ let python_highlight_all = 1
 "
 " VimWiki
 let g:vimwiki_list = [{'path': '~/Dropbox/vimwiki/',
-                      \ 'syntax': 'markdown', 'ext': '.md', 'diary_rel_path' : '/'}]
-
+                      \ 'syntax': 'markdown', 'ext': '.md', 'diary_rel_path' : '/diary'}]
+:map <Leader><Space> <Plug>VimwikiToggleListItem
 
 " YouCompleteMe Settings
 let g:ycm_autoclose_preview_window_after_completion=1
