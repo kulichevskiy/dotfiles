@@ -1,6 +1,3 @@
-" edit .vimrc
-map <Leader>vm  :vsp ~/.vimrc<CR>
-nnoremap <Leader>sv :source ~/.vimrc<CR>
 
 syntax enable
 set background=dark
@@ -11,6 +8,7 @@ set rtp+=~/.vim/bundle/Vundle.vim
 
 call vundle#begin()
 
+Plugin 'digitaltoad/vim-pug'
 Plugin 'jiangmiao/auto-pairs'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'scrooloose/nerdcommenter'
@@ -22,12 +20,27 @@ Plugin 'vimwiki/vimwiki'
 Plugin 'tpope/vim-repeat'
 Plugin 'scrooloose/nerdtree'
 Plugin 'vim-scripts/indentpython.vim'
-Plugin 'vim-syntastic/syntastic'
+Plugin 'vim-syntastic/syntastic' " syntax checking
 Plugin 'nvie/vim-flake8'
 Plugin 'tpope/vim-fugitive'
-Plugin 'kien/ctrlp.vim'
+Plugin 'sheerun/vim-polyglot' " syntax highlighting 
+Plugin 'dense-analysis/ale' " async linter
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'mattn/emmet-vim' " html constructor
+Plugin 'jceb/vim-orgmode' " org-mode
 
-call vundle#end()
+" dependancies for org-mode
+Plugin 'utl.vim'
+Plugin 'taglist.vim'
+Plugin 'majutsushi/tagbar'
+Plugin 'tpope/vim-speeddating'
+Plugin 'chrisbra/nrrwrgn'
+Plugin 'itchyny/calendar.vim'
+Plugin 'SyntaxRange'
+" end dependancies for org-mode
+
+packloadall
+silent! helptags ALL
 
 " Set a leader key
 :let mapleader = ","
@@ -91,6 +104,8 @@ syntax on
 
 " enable all Python syntax highlighting features
 let python_highlight_all = 1
+let g:pymode_run = 1
+let g:pymode_run_bind = '<leader>1'
 
 " split navigations
 nnoremap <C-J> <C-W><C-J>
@@ -124,6 +139,20 @@ let g:NERDCommentEmptyLines = 1
 let g:NERDTrimTrailingWhitespace = 1
 let g:NERDToggleCheckAllLines = 1
 
-" Python
-" Save and execute
-nnoremap <leader>py <Esc>:w !python<CR>
+" Polyglot
+let g:polyglot_disabled = ['python']
+
+" ESLint / Prettier
+let g:ale_sign_error = '❌'
+let g:ale_sign_warning = '⚠️'
+let g:ale_fixers = {}
+let g:ale_fixers['javascript'] = ['eslint']
+" Fix files automatically on save
+let g:ale_fix_on_save = 1
+
+" Emmet
+let g:user_emmet_leader_key=','
+
+" NeoVim Python
+let g:python3_host_prog = '/usr/local/bin/python3' 
+let g:python_host_prog = '/usr/bin/python' 
