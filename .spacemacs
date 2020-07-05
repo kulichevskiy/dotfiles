@@ -1,10 +1,6 @@
 ;; -*- mode: emacs-lisp -*-
-;; This file is loaded by Spacemacs at startup.
+
 ;; It must be stored in your home directory.
-
-(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-                         ("melpa" . "https://melpa.org/packages/")))
-
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
@@ -33,25 +29,38 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(csv
+     (org :variables
+          org-enable-org-journal-support t
+          org-journal-dir "~/Dropbox/Org/journal/"
+          org-journal-file-format "%Y-%m-%d"
+
+          )
+     (latex :variables
+            latex-enable-magic t
+            latex-enable-folding t
+            )
+     auto-completion
+     org-roam
+     evil-russian
+     javascript
+     yaml
+     python
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
      helm
-     auto-completion
+     ;; auto-completion
      ;; better-defaults
      emacs-lisp
      git
      markdown
-     org
-     python
-     ipython-notebook
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
-     spell-checking
+     ;; spell-checking
      syntax-checking
      ;; version-control
      )
@@ -59,7 +68,10 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(gruvbox-theme)
+   dotspacemacs-additional-packages '(
+                                      gruvbox-theme
+                                      org-download
+                                      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -131,14 +143,16 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(gruvbox)
+   dotspacemacs-themes '(gruvbox-dark-soft
+                         spacemacs-dark
+                         spacemacs-light)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Fira Code"
-                               :size 14
-                               :weight light
+   dotspacemacs-default-font '("Source Code Pro"
+                               :size 13
+                               :weight normal
                                :width normal
                                :powerline-scale 1.1)
    ;; The leader key
@@ -180,6 +194,10 @@ values."
    ;; If non nil the default layout name is displayed in the mode-line.
    ;; (default nil)
    dotspacemacs-display-default-layout nil
+
+   dotspacemacs-mode-line-theme 'spacemacs
+
+
    ;; If non nil then the last auto saved layouts are resume automatically upon
    ;; start. (default nil)
    dotspacemacs-auto-resume-layouts nil
@@ -188,7 +206,7 @@ values."
    ;; no major mode or minor modes are active. (default is 1)
    dotspacemacs-large-file-size 1
    ;; Location where to auto-save files. Possible values are `original' to
-   ;;dotspacemacs-maximized-at-startup auto-save the file in-place, `cache' to auto-save the file to another
+   ;; auto-save the file in-place, `cache' to auto-save the file to another
    ;; file stored in the cache directory and `nil' to disable auto-saving.
    ;; (default 'cache)
    dotspacemacs-auto-save-file-location 'cache
@@ -263,7 +281,7 @@ values."
    ;;                       text-mode
    ;;   :size-limit-kb 1000)
    ;; (default nil)
-   dotspacemacs-line-numbers t
+   dotspacemacs-line-numbers nil
    ;; Code folding method. Possible values are `evil' and `origami'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
@@ -306,6 +324,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   )
 
+
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
@@ -313,7 +332,81 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  )
+ 
+  (getenv "PATH")
+  (setenv "PATH"
+          (concat
+           "/Library/TeX/texbin" ":"
+
+           (getenv "PATH")))
+  (use-package org-roam-server
+    :ensure t
+    :config
+    (setq org-roam-server-host "127.0.0.1"
+          org-roam-server-port 8080
+          org-roam-server-export-inline-images t
+          org-roam-server-authenticate nil
+          org-roam-server-network-poll t
+          org-roam-server-network-arrows nil
+          org-roam-server-network-label-truncate t
+          org-roam-server-network-label-truncate-length 60
+          org-roam-server-network-label-wrap-length 20))
+  (use-package org-download
+    :after org
+    :bind
+    (:map org-mode-map
+          (("s-Y" . org-download-screenshot)
+           ("s-y" . org-download-yank))))
+  (setq org-refile-use-outline-path 'file)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-download-screenshot-method "/usr/sbin/screencapture -i %s") 
+  
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode "<SPC>" 'org-toggle-checkbox)
+  (spacemacs/set-leader-keys-for-major-mode 'org-roam "<SPC>" 'org-toggle-checkbox)
+  (spacemacs/set-leader-keys "or" 'org-refile)
+  (spacemacs/set-leader-keys "ol" 'org-toggle-link-display)
+  
+  (global-set-key (kbd "C-;") 'org-roam-insert)
+  (global-visual-line-mode 1)
+
+  (setq org-roam-directory "~/Dropbox/Org/")
+  (setq org-image-actual-width '(500))
+  (setq org-roam-capture-templates
+        '(
+          ("d" "default" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "%(format-time-string \"%Y%m%d%H%M%SZ-${slug}\" (current-time) t)"
+           :head "#+title: ${title}\n#+startup: hidestars\n#+startup: indent\n#+roam_tags: \n:properties:\n:created_at: %U\n:end:\n\n* Source\n* Related\n* Content\n")
+          ("p" "permanent note" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "%(format-time-string \"%Y%m%d%H%M%SZ-${slug}\" (current-time) t)"
+           :head "#+title: ${title}\n#+startup: hidestars\n#+startup: indent\n#+roam_tags: per\n:properties:\n:created_at: %U\n:end:\n\n* Source\n* Related\n* Content\n")
+
+          ("l" "literature note" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "%(format-time-string \"%Y%m%d%H%M%SZ-${slug}\" (current-time) t)"
+           :head "#+title: ${title}\n#+startup: hidestars\n#+startup: indent\n#+roam_tags: lit\n:properties:\n:created_at: %U\n:end:\n\n* References\n** Author\n** Summary\n* Related\n* Notes\n\n")
+          ))
+  (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ ;; '(org-download-image-org-width 600)
+ '(org-journal-file-format "%Y-%m-%d.org")
+ '(org-startup-indented t)
+ '(package-selected-packages
+   (quote
+    (tern ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+ '(setq org-refile-allow-creating-parent-nodes))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+)
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -322,40 +415,21 @@ you should place your code here."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- ;;'(custom-enabled-themes (quote (spacemacs-dark)))
- '(custom-safe-themes
-   (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
- '(evil-want-Y-yank-to-eol nil)
- '(exec-path-from-shell-arguments nil)
- '(helm-completing-read-handlers-alist
-   (quote
-    ((org-set-tags-command)
-     (find-tag . helm-completing-read-default-find-tag)
-     (xref-find-definitions . helm-completing-read-default-find-tag)
-     (xref-find-references . helm-completing-read-default-find-tag)
-     (ggtags-find-tag-dwim . helm-completing-read-default-find-tag)
-     (tmm-menubar)
-     (find-file)
-     (execute-extended-command)
-     (dired-do-rename . helm-read-file-name-handler-1)
-     (dired-do-copy . helm-read-file-name-handler-1)
-     (dired-do-symlink . helm-read-file-name-handler-1)
-     (dired-do-relsymlink . helm-read-file-name-handler-1)
-     (dired-do-hardlink . helm-read-file-name-handler-1)
-     (basic-save-buffer . helm-read-file-name-handler-1)
-     (write-file . helm-read-file-name-handler-1)
-     (write-region . helm-read-file-name-handler-1))))
- '(helm-completion-style (quote emacs))
  '(package-selected-packages
    (quote
-    (gruvbox-dark-theme flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck auto-dictionary yapfify pyvenv pytest pyenv-mode py-isort pip-requirements mmm-mode markdown-toc markdown-mode live-py-mode hy-mode dash-functional helm-pydoc gh-md cython-mode company-anaconda anaconda-mode pythonic smeargle orgit magit-gitflow magit-popup helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit git-commit with-editor transient org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize helm-company helm-c-yasnippet gnuplot fuzzy company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async org-plus-contrib evil-unimpaired f s dash))))
+    (ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+
+
+;; org capture templates
+
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -366,53 +440,16 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (gruvbox-dark-hard)))
- '(custom-safe-themes
-   (quote
-    ("4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" "939ea070fb0141cd035608b2baabc4bd50d8ecc86af8528df9d41f4d83664c6a" "aded61687237d1dff6325edb492bde536f40b048eab7246c61d5c6643c696b7f" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
- '(evil-want-Y-yank-to-eol nil)
- '(exec-path-from-shell-arguments nil)
- '(helm-completing-read-handlers-alist
-   (quote
-    ((org-set-tags-command)
-     (find-tag . helm-completing-read-default-find-tag)
-     (xref-find-definitions . helm-completing-read-default-find-tag)
-     (xref-find-references . helm-completing-read-default-find-tag)
-     (ggtags-find-tag-dwim . helm-completing-read-default-find-tag)
-     (tmm-menubar)
-     (find-file)
-     (execute-extended-command)
-     (dired-do-rename . helm-read-file-name-handler-1)
-     (dired-do-copy . helm-read-file-name-handler-1)
-     (dired-do-symlink . helm-read-file-name-handler-1)
-     (dired-do-relsymlink . helm-read-file-name-handler-1)
-     (dired-do-hardlink . helm-read-file-name-handler-1)
-     (basic-save-buffer . helm-read-file-name-handler-1)
-     (write-file . helm-read-file-name-handler-1)
-     (write-region . helm-read-file-name-handler-1))))
- '(helm-completion-style (quote emacs))
- '(hl-todo-keyword-faces
-   (quote
-    (("TODO" . "#dc752f")
-     ("NEXT" . "#dc752f")
-     ("THEM" . "#2d9574")
-     ("PROG" . "#4f97d7")
-     ("OKAY" . "#4f97d7")
-     ("DONT" . "#f2241f")
-     ("FAIL" . "#f2241f")
-     ("DONE" . "#86dc2f")
-     ("NOTE" . "#b1951d")
-     ("KLUDGE" . "#b1951d")
-     ("HACK" . "#b1951d")
-     ("TEMP" . "#b1951d")
-     ("FIXME" . "#dc752f")
-     ("XXX+" . "#dc752f")
-     ("\\?\\?\\?+" . "#dc752f"))))
- '(org-agenda-files (quote ("~/Dropbox/Org/index.org")))
- '(org-refile-targets (quote ((nil :maxlevel . 3))))
+ '(org-agenda-files (quote ("~/Dropbox/Org/")))
+ '(org-journal-file-format "%Y-%m-%d.org")
+ '(org-preview-latex-default-process (quote imagemagick))
+ '(org-refile-targets (quote ((org-agenda-files :maxlevel . 3))))
+ '(org-roam-tag-sources (quote (prop all-directories)))
+ '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (virtualenvwrapper skewer-mode request-deferred ipython-shell-send jupyter ein org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize helm-company helm-c-yasnippet gnuplot fuzzy company-statistics company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async org-plus-contrib evil-unimpaired f s dash))))
+    (org-roam-server ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+ '(setq org-refile-allow-creating-parent-nodes))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -420,89 +457,3 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  )
 )
-
-;; org capture templates
-(setq org-capture-templates
-      '(("n" "Note" entry (file+headline "~/Dropbox/Org/index.org" "Inbox") "\n* %? %^g\n\nAdded on %U\n %i\n")
-        ("t" "Todo" entry (file "~/Dropbox/Org/index.org") "\n* TODO %? %^g\n")))
-
-;; disable helm while adding tags in org mode because it prevented me from adding multiple tags at once
-;;(add-hook 'org-mode-hook
-;;         (lambda () (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command))))
-
-
-;; Autosave files
-(defun full-auto-save ()
-  (interactive)
-  (save-excursion
-    (dolist (buf (buffer-list))
-      (set-buffer buf)
-      (if (and (buffer-file-name) (buffer-modified-p))
-          (basic-save-buffer)))))
-(add-hook 'auto-save-hook 'full-auto-save)
-
-;; Fira Code
-(defun fira-code-mode--make-alist (list)
-  "Generate prettify-symbols alist from LIST."
-  (let ((idx -1))
-    (mapcar
-     (lambda (s)
-       (setq idx (1+ idx))
-       (let* ((code (+ #Xe100 idx))
-          (width (string-width s))
-          (prefix ())
-          (suffix '(?\s (Br . Br)))
-          (n 1))
-     (while (< n width)
-       (setq prefix (append prefix '(?\s (Br . Bl))))
-       (setq n (1+ n)))
-     (cons s (append prefix suffix (list (decode-char 'ucs code))))))
-     list)))
-
-(defconst fira-code-mode--ligatures
-  '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\"
-    "{-" "[]" "::" ":::" ":=" "!!" "!=" "!==" "-}"
-    "--" "---" "-->" "->" "->>" "-<" "-<<" "-~"
-    "#{" "#[" "##" "###" "####" "#(" "#?" "#_" "#_("
-    ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*"
-    "/**" "/=" "/==" "/>" "//" "///" "&&" "||" "||="
-    "|=" "|>" "^=" "$>" "++" "+++" "+>" "=:=" "=="
-    "===" "==>" "=>" "=>>" "<=" "=<<" "=/=" ">-" ">="
-    ">=>" ">>" ">>-" ">>=" ">>>" "<*" "<*>" "<|" "<|>"
-    "<$" "<$>" "<!--" "<-" "<--" "<->" "<+" "<+>" "<="
-    "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<" "<~"
-    "<~~" "</" "</>" "~@" "~-" "~=" "~>" "~~" "~~>" "%%"
-    "x" ":" "+" "+" "*"))
-
-(defvar fira-code-mode--old-prettify-alist)
-
-(defun fira-code-mode--enable ()
-  "Enable Fira Code ligatures in current buffer."
-  (setq-local fira-code-mode--old-prettify-alist prettify-symbols-alist)
-  (setq-local prettify-symbols-alist (append (fira-code-mode--make-alist fira-code-mode--ligatures) fira-code-mode--old-prettify-alist))
-  (prettify-symbols-mode t))
-
-(defun fira-code-mode--disable ()
-  "Disable Fira Code ligatures in current buffer."
-  (setq-local prettify-symbols-alist fira-code-mode--old-prettify-alist)
-  (prettify-symbols-mode -1))
-
-(define-minor-mode fira-code-mode
-  "Fira Code ligatures minor mode"
-  :lighter " Fira Code"
-  (setq-local prettify-symbols-unprettify-at-point 'right-edge)
-  (if fira-code-mode
-      (fira-code-mode--enable)
-    (fira-code-mode--disable)))
-
-(defun fira-code-mode--setup ()
-  "Setup Fira Code Symbols"
-  (set-fontset-font t '(#Xe100 . #Xe16f) "Fira Code Symbol"))
-
-(provide 'fira-code-mode)
-
-;; sort wrap
-(global-visual-line-mode 1)
-
-;; org refile
-(spacemacs/set-leader-keys-for-major-mode 'org-mode "r" 'org-refile)
