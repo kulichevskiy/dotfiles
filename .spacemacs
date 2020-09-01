@@ -29,7 +29,9 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(csv
+   '(
+     common-lisp
+     csv
      (org :variables
           org-enable-org-journal-support t
           org-journal-dir "~/Dropbox/Org/journal/"
@@ -40,29 +42,17 @@ values."
             latex-enable-magic t
             latex-enable-folding t
             )
-     auto-completion
+     ;;auto-completion
      org-roam
      evil-russian
      javascript
      yaml
      python
-     ;; ----------------------------------------------------------------
-     ;; Example of useful layers you may want to use right away.
-     ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
-     ;; <M-m f e R> (Emacs style) to install them.
-     ;; ----------------------------------------------------------------
      helm
-     ;; auto-completion
-     ;; better-defaults
      emacs-lisp
      git
      markdown
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
-     ;; spell-checking
      syntax-checking
-     ;; version-control
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -70,7 +60,9 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
                                       gruvbox-theme
+                                      evil-surround
                                       org-download
+                                      org-roam-server
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -332,17 +324,14 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
- 
-  (getenv "PATH")
+
+  (setq org-image-actual-width nil)
+  
   (setenv "PATH"
           (concat
-           "/Library/TeX/texbin" ":"
-
-           (getenv "PATH")))
-  (use-package org-roam-server
-    :ensure t
-    :config
-    (setq org-roam-server-host "127.0.0.1"
+           "/Library/TeX/texbin" ":"))
+  (setq global-evil-surround-mode 1)
+  (setq org-roam-server-host "127.0.0.1"
           org-roam-server-port 8080
           org-roam-server-export-inline-images t
           org-roam-server-authenticate nil
@@ -350,24 +339,18 @@ you should place your code here."
           org-roam-server-network-arrows nil
           org-roam-server-network-label-truncate t
           org-roam-server-network-label-truncate-length 60
-          org-roam-server-network-label-wrap-length 20))
-  (use-package org-download
-    :after org
-    :bind
-    (:map org-mode-map
-          (("s-Y" . org-download-screenshot)
-           ("s-y" . org-download-yank))))
+          org-roam-server-network-label-wrap-length 20)
   (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-download-screenshot-method "/usr/sbin/screencapture -i %s") 
   
   (spacemacs/set-leader-keys-for-major-mode 'org-mode "<SPC>" 'org-toggle-checkbox)
-  (spacemacs/set-leader-keys-for-major-mode 'org-roam "<SPC>" 'org-toggle-checkbox)
   (spacemacs/set-leader-keys "or" 'org-refile)
   (spacemacs/set-leader-keys "ol" 'org-toggle-link-display)
   
   (global-set-key (kbd "C-;") 'org-roam-insert)
+  (global-set-key (kbd "C-ж") 'org-roam-insert)
   (global-visual-line-mode 1)
 
   (setq org-roam-directory "~/Dropbox/Org/")
@@ -448,7 +431,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (org-roam-server ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (tern ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(setq org-refile-allow-creating-parent-nodes))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
