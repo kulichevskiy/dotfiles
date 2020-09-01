@@ -6,3 +6,4 @@ cp ~/.zshrc .
 
 # Emacs
 cp ~/.spacemacs .
+cp -r ~/.doom.d .
