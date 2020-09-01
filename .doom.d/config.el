@@ -7,7 +7,7 @@
       doom-theme 'doom-one
       display-line-numbers-type t)
 
-(setq org-directory "~/Org/"
+(setq org-directory "~/org/"
       org-ellipsis " ▼ ")
 
 (use-package evil-collection
