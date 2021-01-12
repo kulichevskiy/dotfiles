@@ -8,6 +8,7 @@
       display-line-numbers-type t)
 
 (setq org-directory "~/org/"
+      orb-library (concat org-directory "library.bib")
       org-ellipsis " ▼ ")
 
 (use-package evil-collection
@@ -29,6 +30,59 @@
                ("C-c n g" . org-roam-graph))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))))
+
+
+(use-package org-roam-bibtex
+  :after (org-roam)
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :config
+  (setq org-roam-bibtex-preformat-keywords
+    '("=key=" "title" "author" "year" "month" "url" "file" "author-or-editor" "keywords"))
+  (setq orb-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point) ""
+           :file-name "${slug}"
+           :head "#+title: ${title}
+#+roam_key: ${ref}
+
+:properties:
+  :custom_id: ${ref}
+  :author: ${author}
+  :year: ${year}
+  :month: ${month}
+:end:\n\n"
+           :unnarrowed t))))
+
+(setq
+ bibtex-completion-notes-path org-directory
+ bibtex-completion-bibliography orb-library
+ bibtex-completion-pdf-field "file"
+)
+
+(use-package org-noter
+  :after (:any org pdf-view)
+  :config
+  (setq
+   ;; The WM can handle splits
+   org-noter-notes-window-location 'other-frame
+   ;; Please stop opening frames
+   org-noter-always-create-frame nil
+   ;; I want to see the whole file
+   org-noter-hide-other nil
+   ;; Everything is relative to the main notes file
+   )
+  )
+
+(use-package org-ref
+    :config
+    (setq
+         org-ref-completion-library 'org-ref-ivy-cite
+         org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-helm-bibtex
+         org-ref-default-bibliography (list orb-library)
+         org-ref-bibliography-notes "~/org/bibnotes.org"
+         org-ref-note-title-format "* TODO %y - %t\n :properties:\n  :custom_id: %k\n  :noter_document: %f\n :roam_key: cite:%k\n  :author: %9a\n  :journal: %j\n  :year: %y\n  :volume: %v\n  :pages: %p\n  :doi: %D\n  :url: %U\n :end:\n\n"
+         org-ref-notes-directory "/home/haozeke/Git/Gitlab/Mine/Notes/"
+         org-ref-notes-function 'orb-edit-notes
+         ))
 
 (setq org-roam-server-host "127.0.0.1"
           org-roam-server-port 8080
@@ -72,8 +126,10 @@
   (setq org-journal-prefix-key "C-c j ")
   :config
   (setq org-journal-dir (concat org-directory "journal/")
+        org-journal-file-type 'weekly
         org-journal-file-format "%Y-%m-%d.org"
-        org-journal-date-format "%A, %d %B %Y"))
+        org-journal-date-format "%A, %d %B %Y")
+        org-journal-time-format "%H:%M")
 
 (map! :leader
       (:prefix-map ("a" . "applications")
@@ -85,6 +141,17 @@
        (:prefix ("r" . "roam")
         :desc "Find File" "f" #'org-roam-find-file
         :desc "Show Roam Outline" "l" #'org-roam)))
+
+(defun org-journal-file-header-func (time)
+  "Custom function to create journal header."
+  (concat
+    (pcase org-journal-file-type
+      (`daily "#+TITLE: Daily Journal\n#+STARTUP: showeverything")
+      (`weekly "#+TITLE: Weekly Journal\n#+STARTUP: folded")
+      (`monthly "#+TITLE: Monthly Journal\n#+STARTUP: folded")
+      (`yearly "#+TITLE: Yearly Journal\n#+STARTUP: folded"))))
+
+(setq org-journal-file-header 'org-journal-file-header-func)
 
 ;; set global keys
 (define-key key-translation-map (kbd "C-х") [escape])
