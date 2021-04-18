@@ -112,3 +112,13 @@ source /usr/local/bin/virtualenvwrapper.sh
 # tabtab source for packages
 # uninstall by removing these lines
 [[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
+
+# Adjust settings
+if [ ! -S ~/.ssh/ssh_auth_sock ]; then
+eval `ssh-agent -t8h`
+ln -sf "$SSH_AUTH_SOCK" ~/.ssh/ssh_auth_sock
+fi
+export SSH_AUTH_SOCK=~/.ssh/ssh_auth_sock
+ssh-add -l > /dev/null || ssh-add
+
+
