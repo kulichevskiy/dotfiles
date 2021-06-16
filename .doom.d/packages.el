@@ -8,7 +8,6 @@
 (package! org-ref)
 (package! org-noter)
 (package! org-roam)
-(package! org-roam-server)
 (package! org-download)
 (package! org-journal)
 (package! org-roam-server)

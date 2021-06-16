@@ -8,7 +8,9 @@
       display-line-numbers-type t)
 
 (setq org-directory "~/Dropbox/org/"
-      orb-library (concat org-directory "library.bib")
+      org-agenda-files (list "~/Dropbox/org/" "~/Dropbox/org/journal/")
+      org-todo-keywords '((type "TODO" "STARTED" "WAITING" "|" "DONE" "CANCELED"))
+      org-library (concat org-directory "library.bib")
       org-ellipsis " ▼ ")
 
 (use-package org-roam
@@ -51,3 +53,35 @@
        (:prefix ("r" . "roam")
         :desc "Find File" "f" #'org-roam-find-file
         :desc "Show Roam Outline" "l" #'org-roam)))
+
+(use-package! org-roam-bibtex
+  :after org-roam
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :config
+  (require 'org-ref)) ; optional: if Org Ref is not loaded anywhere else, load it here
+
+(setq bibtex-completion-notes-path org-directory)
+(setq bibtex-completion-bibliography org-library)
+
+(setq projectile-project-search-path '("~/Code/"))
+
+(setq +format-on-save-enabled-modes
+      '(not emacs-lisp-mode  ; elisp's mechanisms are good enough
+            sql-mode         ; sqlformat is currently broken
+            tex-mode         ; latexindent is broken
+            web-mode
+            html-mode
+            latex-mode))
+
+(set-formatter! 'html-tidy
+  '("tidy" "-q" "-indent"
+    "--tidy-mark" "no"
+    "--drop-empty-elements" "no"
+    "--show-body-only" "auto"
+    ("--indent-spaces" "%d" tab-width)
+    ("--indent-with-tabs" "%s" (if indent-tabs-mode "yes" "no"))
+    ("-xml" (memq major-mode '(nxml-mode xml-mode))))
+  :ok-statuses '(0 1))
+
+(global-visual-line-mode t)
+
